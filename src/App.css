@@ -1,0 +1,66 @@
+.login{
+  background-color: #E5EDF9;
+}
+
+.otpPage{
+  background-color: #E5EDF9;
+}
+
+.dashboard{
+  background-color: #E5EDF9;
+}
+
+
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width:none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, and Opera */
+}
+
+
+
+/* src/DashboardPage.css */
+@media (max-width: 640px) {
+  .text-xl {
+    font-size: 1.25rem;
+  }
+
+  .text-3xl {
+    font-size: 1.875rem;
+  }
+
+  .text-4xl {
+    font-size: 2.25rem;
+  }
+
+  .text-5xl {
+    font-size: 3rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .lg:w-1 {
+    width: 50%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .lg:w-1{
+    width: 50%;
+  }
+
+  .text-3xl {
+    font-size: 2rem;
+  }
+
+  .text-4xl {
+    font-size: 2.5rem;
+  }
+
+  .text-5xl {
+    font-size: 3.5rem;
+  }
+}
