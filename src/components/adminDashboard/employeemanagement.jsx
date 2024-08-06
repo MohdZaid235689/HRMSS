@@ -25,6 +25,8 @@ const warnings = [
     { issue: 'Delayed submission of quarterly report', date: '2024-07-30' },
     { issue: 'Pending feedback from team', date: '2024-08-01' },
 ];
+const name = localStorage.getItem('name')
+console.log("name", name)
 
 const EmpDashboardPage = () => {
     const animationProps = useSpring({
@@ -39,13 +41,18 @@ const EmpDashboardPage = () => {
             <div className="p-6 md:p-12 lg:p-8 bg-blue-50 ">
                 <div className="flex flex-col lg:flex-row gap-6 mb-12">
                     <div className="lg:w-1/2 flex items-center ml-6">
-                        <div className="text-3xl md:text-4xl lg:text-5xl font-semibold text-gray-600 mr-6 " style={{ fontFamily: 'Montserrat' }}>
-                        Hello Hemant! Welcome To VCS <div className="text-gray-400">Employee Portal</div>
+                        {/* <div className="text-3xl md:text-4xl lg:text-5xl font-semibold text-gray-600 mr-6 " style={{ fontFamily: 'Montserrat' }}>
+                        Hello {name}! <div className="text-2xl">Welcome To Venture consultancy Services</div> <div className="text-gray-400">Employee Portal</div>
 
+                        </div> */}
+                        <div className="text-3xl md:text-4xl lg:text-5xl font-semibold text-gray-600 mr-6" style={{ fontFamily: 'Montserrat' }}>
+                            Hello {name ? name : 'Guest'}!
+                            <div className="text-2xl">Welcome To Venture Consultancy Services</div>
+                            <div className="text-gray-400">Employee Portal</div>
                         </div>
-                       
-                           
-                        
+
+
+
                     </div>
                     <div className="lg:w-1/2 flex justify-center items-center">
                         <PieChart width={400} height={400}>

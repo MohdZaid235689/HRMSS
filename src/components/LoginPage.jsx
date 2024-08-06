@@ -160,7 +160,8 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import axiosInstance from '@/axios/axios';
+import axios from 'axios';
 const LoginPage = () => {
   const navigate = useNavigate();
   const [inputs, setInputs] = useState({
@@ -180,8 +181,44 @@ const LoginPage = () => {
     setIsEmployeeSelected(true);
   };
 
-  const handleLogin = () => {
-    navigate('/otp');
+  
+
+  const handleLogin = async() => {
+
+    const getIP = async () => {
+      try {
+        const response = await axios.get(
+          "https://api.ipify.org?format=json"
+        );
+        return response.data.ip;
+      } catch (error) {
+        console.log("Error fetching IP address:", error);
+        return "";
+      }
+    };
+
+    const ipAddress = await getIP();
+
+    const data = {
+      email: inputs.email,
+      password: inputs.password,
+      ip:ipAddress
+    }
+
+    console.log("data",data)
+
+    const response = await axios.post('http://157.245.109.206:8091/identity-handler/auth/login-employee',data)
+    console.log(response.data)
+    if(response.status === 200)
+    {
+      localStorage.setItem('email',inputs.email)
+      localStorage.setItem('password',inputs.password)
+      navigate('/otp')
+    }
+
+    
+    
+    
   };
 
   return (

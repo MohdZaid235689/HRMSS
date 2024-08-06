@@ -27,77 +27,94 @@ const OtpScreen = () => {
   //   }
   // })
 
-  // const handleOtp = async (event) => {
-  //   event.preventDefault();
+  const handleOtp = async (event) => {
+    event.preventDefault();
     
 
-  //   // Construct OTP from individual inputs
-  //   const otp = parseInt(`${inputs.zero}${inputs.one}${inputs.two}${inputs.three}`);
-  //   console.log("OTP Value:", otp);
+    // Construct OTP from individual inputs
+    const otp = parseInt(`${inputs.zero}${inputs.one}${inputs.two}${inputs.three}`);
+    console.log("OTP Value:", otp);
 
-  //   // Get email and password from localStorage
-  //   const email = localStorage.getItem('email');
-  //   const password = localStorage.getItem('password');
+    // Get email and password from localStorage
+    const email = localStorage.getItem('email');
+    const password = localStorage.getItem('password');
 
-  //   // Prepare data payload
-  //   const data = {
-  //     email: email,
-  //     password: password,
-  //     otp: otp
-  //   };
+    const getIP = async () => {
+      try {
+        const response = await axios.get(
+          "https://api.ipify.org?format=json"
+        );
+        return response.data.ip;
+      } catch (error) {
+        console.log("Error fetching IP address:", error);
+        return "";
+      }
+    };
 
-  //   try {
-  //     // Send POST request
-  //     const response = await axios.post('http://192.168.1.28:7000/identity-handler/auth/login-with-otp', data);
-  //     console.log("response", response.data);
+    const ipAddress = await getIP();
+
+
+    // Prepare data payload
+    const data = {
+      email: email,
+      password: password,
+      otp: otp,
+      ip:ipAddress
+
+    };
+
+    try {
+      // Send POST request
+      const response = await axios.post('http://157.245.109.206:8091/identity-handler/auth/login-with-otp', data);
+      console.log("response", response.data);
       
-  //     if(response.status === 200)
-  //     {
-  //       localStorage.setItem('empCode',response.data.empCode)
-  //       localStorage.setItem('token',response.data.token)
-  //       navigate('/dashboard')
+      if(response.status === 200)
+      {
+        localStorage.setItem('empCode',response.data.empCode)
+        localStorage.setItem('token',response.data.token)
+        localStorage.setItem('empNumber',response.data.empNumber)
+        localStorage.setItem('name',response.data.name)
+        navigate('/employee-dashboard')
+      }
+    } catch (error) {
+      console.error("Error during OTP submission:", error);
+    }
+  };
 
+  const handleChange = (e, index) => {
+    const { value } = e.target;
+    if (/[^0-9]/.test(value)) return; // Allow only digits
 
-  //     }
-  //   } catch (error) {
-  //     console.error("Error during OTP submission:", error);
-  //   }
-  // };
+    setInputs((prevInputs) => {
+      const newInputs = { ...prevInputs };
+      switch (index) {
+        case 0:
+          newInputs.zero = value;
+          break;
+        case 1:
+          newInputs.one = value;
+          break;
+        case 2:
+          newInputs.two = value;
+          break;
+        case 3:
+          newInputs.three = value;
+          break;
+        default:
+          break;
+      }
+      return newInputs;
+    });
 
-  // const handleChange = (e, index) => {
-  //   const { value } = e.target;
-  //   if (/[^0-9]/.test(value)) return; // Allow only digits
+    // Automatically move focus to the next input
+    if (value && index < 3) {
+      document.getElementById(`otp-${index + 1}`).focus();
+    }
+  };
 
-  //   setInputs((prevInputs) => {
-  //     const newInputs = { ...prevInputs };
-  //     switch (index) {
-  //       case 0:
-  //         newInputs.zero = value;
-  //         break;
-  //       case 1:
-  //         newInputs.one = value;
-  //         break;
-  //       case 2:
-  //         newInputs.two = value;
-  //         break;
-  //       case 3:
-  //         newInputs.three = value;
-  //         break;
-  //       default:
-  //         break;
-  //     }
-  //     return newInputs;
-  //   });
-
-  //   // Automatically move focus to the next input
-  //   if (value && index < 3) {
-  //     document.getElementById(`otp-${index + 1}`).focus();
-  //   }
-  // };
-
-  const handleOtp = () => {
-    navigate('/employee-dashboard')
-  }
+  // const handleOtp = () => {
+  //   navigate('/employee-dashboard')
+  // }
   return (
     <div className="relative flex min-h-screen flex-col justify-center bg-gray-100 py-12">
       <div className="relative bg-white px-6 pt-10 pb-9 shadow-xl mx-auto w-full max-w-lg rounded-2xl">
