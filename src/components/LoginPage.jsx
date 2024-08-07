@@ -62,23 +62,23 @@
 //             </div>
 //             <div className="lg:w-2/6 md:w-1/2 bg-white shadow-lg rounded-lg p-8 flex flex-col md:ml-auto w-full mt-10 md:mt-0">
 //             <div className="flex flex-col md:flex-row justify-center gap-4 mb-8">
-                
+
 //                 <button
 //                     className={`bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300 `}
-                   
-                    
+
+
 //                 >
 //                     H.R
 //                 </button>
 //                 <button
 //                     className={`bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-300 `}
-                   
-                   
+
+
 //                 >
 //                     Employee
 //                 </button>
 //             </div>
-              
+
 //               <div className="relative mb-4 mt-4">
 //                 <input type="text" name="email" placeholder="Email address or phone number" className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-lg outline-none  text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out" onChange={(e) => setinputs({ ...inputs, email: e.target.value })} value={inputs.email} />
 //               </div>
@@ -158,10 +158,11 @@
 
 
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '@/axios/axios';
 import axios from 'axios';
+
 const LoginPage = () => {
   const navigate = useNavigate();
   const [inputs, setInputs] = useState({
@@ -181,44 +182,80 @@ const LoginPage = () => {
     setIsEmployeeSelected(true);
   };
 
-  
 
-  const handleLogin = async() => {
 
-    const getIP = async () => {
-      try {
-        const response = await axios.get(
-          "https://api.ipify.org?format=json"
-        );
-        return response.data.ip;
-      } catch (error) {
-        console.log("Error fetching IP address:", error);
-        return "";
-      }
-    };
+  const handleLogin = async () => {
 
-    const ipAddress = await getIP();
+    // const getIP = async () => {
+    //   try {
+    //     const response = await axios.get(
+    //       "https://api.ipify.org?format=json"
+    //     );
+    //     return response.data.ip;
+    //   } catch (error) {
+    //     console.log("Error fetching IP address:", error);
+    //     return "";
+    //   }
+    // };
+
+    // const ipAddress = await getIP();
+
+    // const getPrivateIP = async () => {
+    //   try {
+    //     const pc = new RTCPeerConnection({ iceServers: [] });
+    //     pc.createDataChannel('');
+
+    //     return new Promise((resolve, reject) => {
+    //       pc.onicecandidate = (event) => {
+    //         if (!event || !event.candidate) return;
+    //         const candidate = event.candidate.candidate;
+    //         const parts = candidate.split(' ');
+    //         const addr = parts[4];
+    //         if (addr.startsWith('192.168') || addr.startsWith('10.') || addr.startsWith('172.')) {
+    //           resolve(addr);
+    //           pc.close();
+    //         }
+    //       };
+
+    //       pc.createOffer()
+    //         .then(offer => pc.setLocalDescription(offer))
+    //         .catch(err => reject(err));
+    //     });
+    //   } catch (error) {
+    //     console.error('Error getting private IP:', error);
+    //   }
+    // };
+
+    // // Usage example with async/await
+    // const fetchPrivateIP = async () => {
+    //   const ip = await getPrivateIP();
+    //   console.log('Private IP Address:', ip);
+    // };
+    // fetchPrivateIP();
+
+
+
+
 
     const data = {
       email: inputs.email,
       password: inputs.password,
-      ip:ipAddress
+      ip: "string12"
     }
 
-    console.log("data",data)
+    console.log("data", data)
 
-    const response = await axios.post('http://157.245.109.206:8091/identity-handler/auth/login-employee',data)
+    const response = await axios.post('http://157.245.109.206:8091/identity-handler/auth/login-employee', data)
     console.log(response.data)
-    if(response.status === 200)
-    {
-      localStorage.setItem('email',inputs.email)
-      localStorage.setItem('password',inputs.password)
+    if (response.status === 200) {
+      localStorage.setItem('email', inputs.email)
+      localStorage.setItem('password', inputs.password)
       navigate('/otp')
     }
 
-    
-    
-    
+
+
+
   };
 
   return (

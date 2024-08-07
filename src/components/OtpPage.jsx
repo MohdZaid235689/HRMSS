@@ -39,19 +39,19 @@ const OtpScreen = () => {
     const email = localStorage.getItem('email');
     const password = localStorage.getItem('password');
 
-    const getIP = async () => {
-      try {
-        const response = await axios.get(
-          "https://api.ipify.org?format=json"
-        );
-        return response.data.ip;
-      } catch (error) {
-        console.log("Error fetching IP address:", error);
-        return "";
-      }
-    };
+    // const getIP = async () => {
+    //   try {
+    //     const response = await axios.get(
+    //       "https://api.ipify.org?format=json"
+    //     );
+    //     return response.data.ip;
+    //   } catch (error) {
+    //     console.log("Error fetching IP address:", error);
+    //     return "";
+    //   }
+    // };
 
-    const ipAddress = await getIP();
+    // const ipAddress = await getIP();
 
 
     // Prepare data payload
@@ -59,7 +59,7 @@ const OtpScreen = () => {
       email: email,
       password: password,
       otp: otp,
-      ip:ipAddress
+      ip:"string123"
 
     };
 

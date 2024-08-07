@@ -21,61 +21,114 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet";
 import '../../App.css'
+import { useGeolocated } from "react-geolocated";
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const CheckOutButton = () => {
+    const navigate = useNavigate()
+    const [isPending, setIsPending] = useState(true);
+    const [checkOutTime,setcheckOutTime] = useState('')
     const [attendanceApplied, setAttendanceApplied] = useState(false);
     const [checkInTime, setCheckInTime] = useState('');
     const [status, setStatus] = useState('Pending');
+    const [workingHours,setWorkingHours] = useState(0)
+
     const todayDate = new Date().toISOString().split('T')[0];
 
+    const [selectedWorkMode, setSelectedWorkMode] = useState('');
+
+
+    const [description,setDescription] = useState('')
+
+    
+
+   
+
     useEffect(() => {
-        // Simulate an API call to check if attendance is already marked
-        async function fetchAttendanceStatus() {
-            try {
-                const response = await fetch('/api/check-attendance'); // Replace with actual API endpoint
-                const data = await response.json();
-                
-                if (data.attendanceMarked) {
-                    setAttendanceApplied(true);
-                    setCheckInTime(data.checkInTime);
-                    setStatus(data.status);
+
+        const findTodayAttendence = async () => {
+
+            const response = await axios.post('http://157.245.109.206:8093/emp-handler/attendence/today-emp-atttendence?empCode='+empCode)
+            if (response.status === 202) {
+                if(response.data.result.checkOut != null)
+                {
+                    setIsPending(false)
                 }
-            } catch (error) {
-                console.error('Error fetching attendance status:', error);
+                
+                setCheckInTime(response.data.result.checkIn);
+                setcheckOutTime(response.data.result.checkOut)
+                setWorkingHours(response.data.result.workingHours)
+                console.log("data", response.data);
             }
+            return;
         }
-        
-        fetchAttendanceStatus();
+
+        findTodayAttendence();
+
+        const workMode = localStorage.getItem('remoteWork');
+        if (workMode) {
+            setSelectedWorkMode(workMode);
+        }
+
     }, []);
 
+
+
+    const { coords, isGeolocationAvailable, isGeolocationEnabled } =
+        useGeolocated({
+            positionOptions: {
+                enableHighAccuracy: false,
+            },
+            userDecisionTimeout: 5000,
+        });
+
+
+    // Handle change event for selecting work mode
+    const handleChange = (event) => {
+        setSelectedWorkMode(event.target.value);
+        console.log("mode", selectedWorkMode)
+    };
+
+    const empNumber = localStorage.getItem('empNumber');
+    const empCode = localStorage.getItem('empCode');
+
     const handleApplyAttendance = async () => {
-        const currentTime = new Date().toLocaleTimeString();
-        setCheckInTime(currentTime);
-        setAttendanceApplied(true);
-        const currentHour = new Date().getHours();
-        if (currentHour > 9) { // assuming 9 AM is the official start time
-            setStatus('Late');
-        } else {
-            setStatus('On Time');
+        if (!isGeolocationAvailable || !isGeolocationEnabled || !coords) {
+            console.error("Geolocation is not available or enabled.");
+            return;
+        }
+        const dataa = {
+            latitude: coords.latitude,
+            longitude: coords.longitude,
         }
 
-        // Simulate an API call to mark attendance
-        try {
-            const response = await fetch('/api/apply-attendance', { // Replace with actual API endpoint
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    checkInTime: currentTime,
-                    date: todayDate,
-                    status: currentHour > 9 ? 'Late' : 'On Time'
-                }),
-            });
-            const result = await response.json();
-            console.log('Attendance applied:', result);
-        } catch (error) {
-            console.error('Error applying attendance:', error);
+        const data = {
+            name : localStorage.getItem('name'),
+            empNumber: empNumber, // Replace with actual employee number
+            empCode: empCode, // Replace with actual employee code
+            latitude: dataa.latitude,
+            longitude: dataa.longitude,
+            remoteWork: localStorage.getItem('remoteWork'),
+            description: description 
+        };
+        console.log(data)
+
+
+        const response = await axios.post('http://157.245.109.206:8093/emp-handler/attendence/check-out', data)
+        console.log(response.data)
+        if (response.status === 202) {
+            // setIsPending(false)
+            localStorage.setItem('checkout-Time',response.data.result.checkIn)
+            localStorage.setItem('remoteWork',response.data.result.remoteWork)
+            
+
+            console.log(response);
+            navigate("/attendence")
+            setIsPending(false);
+        }
+        else {
+            alert("you are already mark attendence");
         }
     };
 
@@ -83,9 +136,10 @@ const CheckOutButton = () => {
         <div>
             <Sheet>
                 <SheetTrigger>
-                    <button className="text-md font-medium text-green-800 bg-green-200 rounded-full px-5 py-2">
+                <button className='font-medium text-green-800 bg-green-200 px-4 py-2 rounded-full'>Check-out</button>
+                    {/* <button className="text-md font-medium text-green-800 bg-green-200 rounded-full ">
                         Check-out
-                    </button>
+                    </button> */}
                 </SheetTrigger>
                 <SheetContent className="max-h-screen overflow-auto">
                     <SheetHeader>
@@ -96,14 +150,57 @@ const CheckOutButton = () => {
                         </SheetTitle>
                         <SheetDescription>
                             <div className="mt-4">
-                                <div className="mb-4">
+                            <div className="mb-4">
+                                    <div className="flex gap-4 mb-4">
+                                        <div className="flex items-center">
+                                            <label className="flex items-center mr-4">
+                                                <input
+                                                    type="radio"
+                                                    name="workMode"
+                                                    value="WFH"
+                                                    className="form-radio h-5 w-5 text-black"
+                                                    checked={selectedWorkMode === 'WFH'}
+                                                    disabled
+                                                />
+                                                <span className="ml-2 text-black">WFH</span>
+                                            </label>
+                                            <label className="flex items-center mr-4">
+                                                <input
+                                                    type="radio"
+                                                    name="workMode"
+                                                    value="WFF"
+                                                    className="form-radio h-5 w-5 text-black"
+                                                    checked={selectedWorkMode === 'WFF'}
+                                                    disabled
+                                                />
+                                                <span className="ml-2 text-black">WFF</span>
+                                            </label>
+                                            <label className="flex items-center">
+                                                <input
+                                                    type="radio"
+                                                    name="workMode"
+                                                    value="WFO"
+                                                    className="form-radio h-5 w-5 text-black"
+                                                    checked={selectedWorkMode === 'WFO'}
+                                                    disabled
+                                                />
+                                                <span className="ml-2 text-black">WFO</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+
+
+                
+
+
+
                                     <label className="block text-gray-700 mb-2" htmlFor="date">
                                         Check-In Time
                                     </label>
                                     <input
-                                        type="date"
-                                        id="date"
-                                        value={todayDate}
+                                        
+                                        value={checkInTime}
                                         className="border rounded p-2 w-full"
                                         readOnly
                                     />
@@ -115,6 +212,7 @@ const CheckOutButton = () => {
                                     <textarea
                                         id="description"
                                         className="border rounded p-2 w-full"
+                                        onChange={(e) => setDescription(e.target.value)}
                                     />
                                 </div>
                                 <div className="mb-4">
@@ -125,50 +223,61 @@ const CheckOutButton = () => {
                                         type="text"
                                         id="employee-number"
                                         className="border rounded p-2 w-full"
+                                        value={localStorage.getItem('empNumber')}
                                     />
                                 </div>
 
-                                <div className="flex justify-end">
+                                {<div className="flex justify-end">
                                     <button
                                         onClick={handleApplyAttendance}
-                                        className="px-4 py-2 bg-white text-black rounded border border-black hover:bg-green-500 hover:text-white hover:border-none"
-                                        disabled={attendanceApplied}
+                                        className={`px-4 py-2 rounded border text-black ${isPending
+                                            ? 'bg-white border-black hover:bg-green-500 hover:text-white hover:border-none'
+                                            : 'bg-red-300 border-gray-300 text-white cursor-not-allowed filter blur-xs'
+                                            }`}
+                                        disabled={!isPending}
                                     >
-                                        Check-Out Button
+                                        Check-out Button
                                     </button>
-                                </div>
+                                </div>}
                                 <div className="flex justify-center items-center bg-gray-400 text-white h-[30px] mt-3 mb-3 text-xl font-medium rounded-lg">
                                     Attendance Status
                                 </div>
 
                                 <div>
-                                    <div className="mb-4 flex items-center">
-                                        <label className="block text-gray-700 mb-2 w-1/3">
-                                            Check-in Time
-                                        </label>
-                                        <div className="text-gray-800">
-                                            {attendanceApplied ? checkInTime : '--'}
-                                        </div>
-                                    </div>
+                                    {isPending ? (
+                                        <p>Attendance pending...</p>
+                                    ) : (
+                                        <div >
+                                            <div className="mb-4 flex items-center">
+                                                <label className="block text-gray-700 mb-2 w-1/2">
+                                                    Check-in Time
+                                                </label>
+                                                <div className="text-gray-800 w-2/3">
+                                                    : {isPending ? '--' : checkInTime}
+                                                </div>
+                                            </div>
 
-                                    <div className="mb-4 flex items-center">
-                                        <label className="block text-gray-700 mb-2 w-1/3">
-                                            Check-Out Time
-                                        </label>
-                                        <div className="text-gray-800 w-2/3">
-                                            {/* Show check-out time if applicable */}
-                                        </div>
-                                    </div>
+                                            <div className="mb-4 flex items-center">
+                                                <label className="block text-gray-700 mb-2 w-1/2">
+                                                    Check-out Time
+                                                </label>
+                                                <div className="text-gray-800 w-2/3">
+                                                    : {isPending ? '--' : checkOutTime}
+                                                </div>
+                                            </div>
 
-                                    <div className="mb-4 flex items-center">
-                                        <label className="block text-gray-700 mb-2 w-1/3">
-                                            Working Hours
-                                        </label>
-                                        <div className="text-gray-800 w-2/3">
-                                            {attendanceApplied ? status : '--'}
+                                            <div className="mb-4 flex items-center">
+                                                <label className="block text-gray-700 mb-2 w-1/2">
+                                                    Working Hours
+                                                </label>
+                                                <div className="text-gray-800 w-2/3">
+                                                    : {isPending ? '--' : workingHours}
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
+
                             </div>
                         </SheetDescription>
                     </SheetHeader>

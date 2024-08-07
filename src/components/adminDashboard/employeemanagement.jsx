@@ -46,7 +46,7 @@ const EmpDashboardPage = () => {
 
                         </div> */}
                         <div className="text-3xl md:text-4xl lg:text-5xl font-semibold text-gray-600 mr-6" style={{ fontFamily: 'Montserrat' }}>
-                            Hello {name ? name : 'Guest'}!
+                            {/* Hello {name ? name : 'Guest'}! */} <div className="">{name}</div>
                             <div className="text-2xl">Welcome To Venture Consultancy Services</div>
                             <div className="text-gray-400">Employee Portal</div>
                         </div>
